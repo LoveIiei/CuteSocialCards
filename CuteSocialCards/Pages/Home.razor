@@ -1,42 +1,33 @@
 ﻿@page "/"
 @using System.Text.Json
+@using CuteSocialCards.Components
+@using CuteSocialCards.Data
 @inject IJSRuntime JS
 
-<h1>Personal Profile Card</h1>
+<ThemeSwitcher />
 
-<div class="editor">
-    <input type="text" @bind="Profile.Name" placeholder="Your name" />
-    <input type="text" @bind="Profile.Bio" placeholder="Short bio" />
-    <input type="text" @bind="Profile.Social.Twitter" placeholder="Twitter link" />
-    <input type="text" @bind="Profile.FavoriteGame" placeholder="Favorite Game" />
-    <input type="text" @bind="Profile.FavoriteSong" placeholder="Favorite Song" />
-    <button @onclick="SaveToLocalStorage">💾 Save</button>
-    <button @onclick="LoadFromLocalStorage">📂 Load</button>
-</div>
+<main>
+    <h1>Personal Profile Card</h1>
 
-<div class="card-preview" style="border: 2px solid #ccc; padding: 1rem; margin-top: 1rem;">
-    <h2>@Profile.Name</h2>
-    <p>@Profile.Bio</p>
-    <p><strong>Favorite Game:</strong> @Profile.FavoriteGame</p>
-    <p><strong>Favorite Song:</strong> @Profile.FavoriteSong</p>
-    <p><a href="@Profile.Social.Twitter" target=@Profile.Social.Twitter>Twitter</a></p>
-</div>
+    <div class="editor">
+        <input type="text" @bind="Profile.Name" placeholder="Your name" />
+        <input type="text" @bind="Profile.Bio" placeholder="Short bio" />
+        <input type="text" @bind="Profile.Social.Twitter" placeholder="Twitter link" />
+        <input type="text" @bind="Profile.FavoriteGame" placeholder="Favorite Game" />
+        <input type="text" @bind="Profile.FavoriteSong" placeholder="Favorite Song" />
+    </div>
+
+    <ProfileCard Profile="Profile" />
+
+    <div style="margin-top: 1.5rem; display: flex; gap: 10px;">
+        <button @onclick="SaveToLocalStorage">💾 Save</button>
+        <button @onclick="LoadFromLocalStorage">📂 Load</button>
+        <button @onclick="DownloadCard">🖼️ Download</button>
+    </div>
+</main>
+
 
 @code {
-    public class SocialLinks
-    {
-        public string Twitter { get; set; } = "";
-    }
-
-    public class UserProfile
-    {
-        public string Name { get; set; } = "";
-        public string Bio { get; set; } = "";
-        public string FavoriteGame { get; set; } = "";
-        public string FavoriteSong { get; set; } = "";
-        public SocialLinks Social { get; set; } = new();
-    }
-
     private UserProfile Profile = new();
 
     private async Task SaveToLocalStorage()
@@ -52,5 +43,17 @@
         {
             Profile = JsonSerializer.Deserialize<UserProfile>(json) ?? new();
         }
+    }
+
+    // This method is called when the component is initialized.
+    // It's a good place to load existing data automatically.
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadFromLocalStorage();
+    }
+
+    private async Task DownloadCard()
+    {
+        await JS.InvokeVoidAsync("downloadCardAsImage", "profileCard");
     }
 }

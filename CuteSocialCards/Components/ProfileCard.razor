@@ -1,0 +1,14 @@
+﻿@using CuteSocialCards.Data
+
+<div class="card-preview" id="profileCard">
+    <h2>@Profile.Name</h2>
+    <p>@Profile.Bio</p>
+    <p><strong>Favorite Game:</strong> @Profile.FavoriteGame</p>
+    <p><strong>Favorite Song:</strong> @Profile.FavoriteSong</p>
+    <p><a href="@Profile.Social.Twitter" target="_blank">Twitter</a></p>
+</div>
+
+@code {
+    [Parameter]
+    public UserProfile Profile { get; set; } = new();
+}
