@@ -1,0 +1,56 @@
+﻿@page "/"
+@using System.Text.Json
+@inject IJSRuntime JS
+
+<h1>Personal Profile Card</h1>
+
+<div class="editor">
+    <input type="text" @bind="Profile.Name" placeholder="Your name" />
+    <input type="text" @bind="Profile.Bio" placeholder="Short bio" />
+    <input type="text" @bind="Profile.Social.Twitter" placeholder="Twitter link" />
+    <input type="text" @bind="Profile.FavoriteGame" placeholder="Favorite Game" />
+    <input type="text" @bind="Profile.FavoriteSong" placeholder="Favorite Song" />
+    <button @onclick="SaveToLocalStorage">💾 Save</button>
+    <button @onclick="LoadFromLocalStorage">📂 Load</button>
+</div>
+
+<div class="card-preview" style="border: 2px solid #ccc; padding: 1rem; margin-top: 1rem;">
+    <h2>@Profile.Name</h2>
+    <p>@Profile.Bio</p>
+    <p><strong>Favorite Game:</strong> @Profile.FavoriteGame</p>
+    <p><strong>Favorite Song:</strong> @Profile.FavoriteSong</p>
+    <p><a href="@Profile.Social.Twitter" target=@Profile.Social.Twitter>Twitter</a></p>
+</div>
+
+@code {
+    public class SocialLinks
+    {
+        public string Twitter { get; set; } = "";
+    }
+
+    public class UserProfile
+    {
+        public string Name { get; set; } = "";
+        public string Bio { get; set; } = "";
+        public string FavoriteGame { get; set; } = "";
+        public string FavoriteSong { get; set; } = "";
+        public SocialLinks Social { get; set; } = new();
+    }
+
+    private UserProfile Profile = new();
+
+    private async Task SaveToLocalStorage()
+    {
+        string json = JsonSerializer.Serialize(Profile);
+        await JS.InvokeVoidAsync("localStorage.setItem", "userProfile", json);
+    }
+
+    private async Task LoadFromLocalStorage()
+    {
+        var json = await JS.InvokeAsync<string>("localStorage.getItem", "userProfile");
+        if (!string.IsNullOrWhiteSpace(json))
+        {
+            Profile = JsonSerializer.Deserialize<UserProfile>(json) ?? new();
+        }
+    }
+}
